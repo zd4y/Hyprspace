@@ -212,13 +212,24 @@ void CHyprspaceWidget::draw() {
         workspaces.push_back(SPECIAL_WORKSPACE_START);
     }
 
+    int maxID = INT_MAX;
+    int minID = 1;
+
+    if (g_pCompositor->m_lastMonitor && g_pCompositor->m_lastMonitor->m_activeWorkspace) {
+        minID = ((g_pCompositor->m_lastMonitor->m_activeWorkspace->m_id - 1) / 10) * 10 + 1;
+        maxID = minID + 8;
+    }
+
     // find the lowest and highest workspace id to determine which empty workspaces to insert
-    int lowestID = INT_MAX;
-    int highestID = 1;
+    int lowestID = maxID;
+    int highestID = minID;
+
     for (auto& ws : g_pCompositor->m_workspaces) {
         if (!ws) continue;
         // normal workspaces start from 1, special workspaces ends on -2
         if (ws->m_id < 1) continue;
+        if (ws->m_id > maxID) continue;
+        if (ws->m_id < minID) continue;
         if (ws->m_monitor->m_id == ownerID) {
             workspaces.push_back(ws->m_id);
             if (highestID < ws->m_id) highestID = ws->m_id;
@@ -228,7 +239,7 @@ void CHyprspaceWidget::draw() {
 
     // include empty workspaces that are between non-empty ones
     if (Config::showEmptyWorkspace) {
-        int wsIDStart = 1;
+        int wsIDStart = minID;
         int wsIDEnd = highestID;
 
         // hyprsplit compatibility
@@ -246,7 +257,7 @@ void CHyprspaceWidget::draw() {
     }
 
     // add a new empty workspace at last
-    if (Config::showNewWorkspace) {
+    if (Config::showNewWorkspace && (highestID+1) % 10 != 0) {
         // get the lowest empty workspce id after the highest id of current workspace
         while (g_pCompositor->getWorkspaceByID(highestID) != nullptr) highestID++;
         workspaces.push_back(highestID);
@@ -416,3 +427,4 @@ void CHyprspaceWidget::draw() {
         curWorkspaceRectOffsetX += workspaceBoxW + Config::workspaceMargin * owner->m_scale;
     }
 }
+
