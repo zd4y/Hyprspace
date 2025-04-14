@@ -62,12 +62,13 @@ bool CHyprspaceWidget::buttonEvent(bool pressed, Vector2D coords) {
     }
     // click workspace to change to workspace and exit overview
     else if (targetWorkspace && !pressed) {
+        const auto previousWorkspaceID = getOwner()->activeWorkspaceID();
         if (targetWorkspace->m_bIsSpecialWorkspace)
             getOwner()->activeSpecialWorkspaceID() == targetWorkspaceID ? getOwner()->setSpecialWorkspace(nullptr) : getOwner()->setSpecialWorkspace(targetWorkspaceID);
         else {
             g_pCompositor->getMonitorFromID(targetWorkspace->m_pMonitor->ID)->changeWorkspace(targetWorkspace->m_iID);
         }
-        if (Config::exitOnSwitch && active) hide();
+        if ((Config::exitOnSwitch || previousWorkspaceID == targetWorkspaceID) && active) hide();
     }
     // click elsewhere to exit overview
     else if (Config::exitOnClick && targetWorkspace == nullptr && active && couldExit && !pressed) hide();
