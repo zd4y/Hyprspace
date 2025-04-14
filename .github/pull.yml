@@ -1,0 +1,7 @@
+version: "1"
+rules:
+  - base: auto
+    upstream: KZDKM:main
+    mergeMethod: rebase
+    conflictReviewers:
+      - zd4y
